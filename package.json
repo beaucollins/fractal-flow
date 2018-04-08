@@ -1,0 +1,34 @@
+{
+  "name": "fractal",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "flow": "flow",
+    "start": "babel-node src/server",
+    "client": "babel-node src/client"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@babel/cli": "^7.0.0-beta.44",
+    "@babel/core": "^7.0.0-beta.44",
+    "@babel/node": "^7.0.0-beta.44",
+    "@babel/plugin-proposal-object-rest-spread": "^7.0.0-beta.44",
+    "@babel/preset-env": "^7.0.0-beta.44",
+    "@babel/preset-flow": "^7.0.0-beta.44",
+    "@babel/register": "^7.0.0-beta.44",
+    "babel-eslint": "^8.2.2",
+    "babel-preset-flow": "^6.23.0",
+    "commander": "^2.15.1",
+    "eslint": "^4.19.1",
+    "eslint-plugin-flowtype": "^2.46.1",
+    "flow": "^0.2.3",
+    "flow-bin": "^0.69.0",
+    "flow-typed": "^2.4.0",
+    "redux": "^3.7.2",
+    "socket.io": "^2.1.0"
+  },
+  "dependencies": {}
+}

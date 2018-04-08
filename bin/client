@@ -1,0 +1,21 @@
+#!/usr/bin/env babel-node
+// @flow
+const createIOClient = require( 'socket.io-client' );
+const program = require( 'commander' );
+
+program.option( '-u, --user <id>', 'user id' ).parse( process.argv );
+
+const client = createIOClient( 'http://localhost:3003' );
+
+client.on( 'user', callback => {
+    console.log( 'user requested' );
+    callback( { id: program.user } );
+} );
+
+setInterval( () => {
+    client.emit( 'api.dispatch', { type: 'INCREMENT', amount: 5 } );
+}, 100 );
+
+client.on( 'api.state', ( state ) => {
+    console.log( 'received state', state );
+} );
