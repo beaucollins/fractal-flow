@@ -4,8 +4,11 @@ import socketIOComponent from '../../components/socket-io';
 
 type UserID = string;
 export type User = { id: UserID };
-export type Action = 'grow' | 'shrink';
-export type Effect
+export type Action
+ = { user: User, action: 'grow' }
+ | { user: User, action: 'sink' };
+
+export type Signal
 	= { type: 'socket', socket: SocketIOSocket, action: SocketActionType  }
 	| { type: 'emit', name: string, to?: string | string[], args: mixed[] }
 	| { type: 'sync', userID: UserID };
@@ -16,24 +19,18 @@ type SocketActionType
 	| { type: 'emit', name: string, args: mixed[] }
 	| { type: 'disconnect' }
 
-export type UserComponent = Component<User, Action, Effect>;
+export type UserComponent = Component<Action, Signal>;
 
-type SocketIONamespace = any;
-type SocketIOSocket = any;
+export opaque type SocketIONamespace = any;
+export opaque type SocketIOSocket = any;
 
-type Document = {
-	user: User,
-	stuff: 'string'
-}
-
-export default (namespace: SocketIONamespace, authenticator: (SocketIOSocket) => Promise<User>): UserComponent => socketIOComponent( {
+export default (namespace: SocketIONamespace, onConnection: (SocketIOSocket) => Promise<void>): UserComponent => socketIOComponent( {
 	namespace,
-	authenticator,
+	onConnection,
 	effectHandler: ( effect ) => {
 		if ( effect.type ) {
 			switch( effect.type ) {
 			case 'sync':
-				console.log( 'sync document to user', effect.userID );
 				break;
 			case 'emit':
 				( effect.to

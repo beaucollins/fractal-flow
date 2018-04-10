@@ -1,22 +1,21 @@
 // @flow
 type SocketIONamespace = any;
 type SocketIOSocket = any;
-type SocketAuthenticator<Actor> = SocketIOSocket => Promise<Actor>;
-type SocketIOConfig<Actor, Signal> = {
+type SocketAuthenticator = SocketIOSocket => Promise<void>;
+type SocketIOConfig<Signal> = {
 	namespace: SocketIONamespace,
-	authenticator: SocketAuthenticator<Actor>,
+	onConnection: SocketAuthenticator,
 	effectHandler: Signaler<Signal>
 }
 
 import type { Component, Signaler } from '../fractal';
 
-function socketIOComponent<Actor, Action, Effect>( config: SocketIOConfig<Actor, Effect> ): Component<Actor, Action, Effect> {
+function socketIOComponent<Action, Signal>( config: SocketIOConfig<Signal> ): Component<Action, Signal> {
 	return dispatch => {
 		config.namespace.on( 'connection', async ( connection ) => {
-			const actor = await config.authenticator( connection );
+			await config.onConnection( connection );
 			connection.on( 'dispatch', ( action: Action ) => {
-				console.log( 'dispatch?' );
-				dispatch( { actor, action } );
+				dispatch( action );
 			} );
 		} );
 		return config.effectHandler;

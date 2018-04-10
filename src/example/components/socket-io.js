@@ -1,11 +1,11 @@
 // @flow
-import type { Component, Dispatcher, Activity } from '../../fractal';
+import type { Component, Dispatcher } from '../../fractal';
 export opaque type SocketIOSocket = any;
 export opaque type SocketIONamespace = any;
 export type SocketContext = { socket: SocketIOSocket, namespace: SocketIONamespace };
 
-type Signal<Actor, Action>
-	= SocketListener<Actor, Action>
+type Signal<Action>
+	= SocketListener<Action>
 	| SocketEmit;
 
 type SocketEmit = {
@@ -15,33 +15,32 @@ type SocketEmit = {
 	arguments: any[]
 }
 
-export type SocketListener<Actor, Action> = {
+export type SocketListener<Action> = {
 	type: 'socketListener',
 	socket: SocketIOSocket,
 	eventName: string,
-	dispatch: Dispatcher<Actor, Action>,
-	action: (... any[]) => Activity<Actor, Action>
+	dispatch: Dispatcher<Action>,
+	action: (... any[]) => Action
 };
 
 type SocketAction
 	= ConnectAction;
 
-type ConnectAction = { type: 'connect' };
+type ConnectAction = { context: SocketContext, type: 'connect' };
 
-export type SocketIOComponent<Actor, Action> = Component<SocketContext, SocketAction, Signal<Actor, Action>>;
-
+export type SocketIOComponent<Action> = Component<SocketAction, Signal<Action>>;
 
 // question, how to set up listeners for specific events?
 // can we create a fully typed event action?
 
-function createSocketIOComponent<Actor, Action>( namespace: SocketIONamespace ): SocketIOComponent<Actor, Action> {
-	return ( dispatcher: Dispatcher<SocketContext, SocketAction> ) => {
+function createSocketIOComponent<Action>( namespace: SocketIONamespace ): SocketIOComponent<Action> {
+	return ( dispatcher: Dispatcher<SocketAction> ) => {
 		namespace.on( 'connection', ( socket: SocketIOSocket ) => {
 			const context: SocketContext = {
 				namespace, socket
 			};
 			
-			dispatcher( { actor: context, action: { type: 'connect' } } );
+			dispatcher( { context, type: 'connect', action: { type: 'connect' } } );
 		} );
 		return effect => {
 			// manipulates the namespace or socket

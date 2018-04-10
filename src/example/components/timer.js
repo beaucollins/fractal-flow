@@ -1,16 +1,16 @@
 // @flow
 import type { Component } from '../../fractal';
 
-export type Effect = 'start' | 'stop';
+export type Signal = 'start' | 'stop';
 
-const component: (number) => Component<void, number, Effect> = ( interval = 1000 ) => ( dispatcher ) => {
+const component: (number) => Component<number, Signal> = ( interval = 1000 ) => ( dispatcher ) => {
 	let timer = null;
 	const start = () => {
 		if ( timer ) {
 			return;
 		}
 		timer = setInterval( () => {
-			dispatcher( { actor: undefined, action: Date.now() } );
+			dispatcher( Date.now() );
 		}, interval );
 	};
 	const stop = () => {
