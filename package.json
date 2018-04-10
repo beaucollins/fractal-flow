@@ -28,7 +28,8 @@
     "flow-bin": "^0.69.0",
     "flow-typed": "^2.4.0",
     "redux": "^3.7.2",
-    "socket.io": "^2.1.0"
+    "socket.io": "^2.1.0",
+    "socket.io-redis": "^5.2.0"
   },
   "dependencies": {}
 }

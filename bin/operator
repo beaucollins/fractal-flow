@@ -5,12 +5,11 @@ const createIOClient = require( 'socket.io-client' );
 const program = require( 'commander' );
 
 program
-	.option( '-u, --user <id>', 'user id' )
-	.option( '-n, --num-clients <count>', 'number of clients to run', 1 )
+	.option( '--id <id>', 'user id' )
 	.parse( process.argv );
 
 const runClient = ( userId ) => {
-	const client = createIOClient( 'http://localhost:3003/users' );
+	const client = createIOClient( 'http://localhost:3003/operator' );
 
 	client.on( 'user', callback => {
 		console.log( 'user requested' );
@@ -23,7 +22,7 @@ const runClient = ( userId ) => {
 	} );
 
 	setInterval( () => {
-		client.emit( 'dispatch', { type: 'INCREMENT', amount: 5 } );
+		client.emit( 'hello', { type: 'INCREMENT', amount: 5 } );
 	}, 1000 );
 
 	client.on( 'api.state', ( state ) => {
@@ -42,6 +41,4 @@ const runClient = ( userId ) => {
 	} );
 };
 
-for( let i = program.numClients; i > 0; i--) {
-	runClient( program.user );
-}
+runClient( program.id );
