@@ -4,10 +4,6 @@ export opaque type SocketIOSocket = any;
 export opaque type SocketIONamespace = any;
 export type SocketContext = { socket: SocketIOSocket, namespace: SocketIONamespace };
 
-type EmitRemover<EventName: string> = (EventName) => void;
-type EmitListener<EventName: string, EventArguments> = (EventName, EventArguments) => void;
-type EmitActionCreator<EventName: string, EventArguments> = (SocketIOSocket, EventName, EmitListener<EventName, EventArguments>) => EmitRemover<EventName>;
-
 type Signal<Actor, Action>
 	= SocketListener<Actor, Action>
 	| SocketEmit;
@@ -24,7 +20,7 @@ export type SocketListener<Actor, Action> = {
 	socket: SocketIOSocket,
 	eventName: string,
 	dispatch: Dispatcher<Actor, Action>,
-	action: (... ?any[]) => Activity<Actor, Action>
+	action: (... any[]) => Activity<Actor, Action>
 };
 
 type SocketAction

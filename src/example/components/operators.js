@@ -30,7 +30,7 @@ const socketActionEmitter = <Actor, Action>( socket: SocketIOSocket, eventName: 
 		dispatch,
 		action
 	};
-}
+};
 
 const createOperatorComponent: OperatorComponentCreator = (namespace: SocketIONamespace) => {
 	const component:SocketIOComponent<Operator, Action> = createSocketComponent( namespace );
@@ -41,7 +41,7 @@ const createOperatorComponent: OperatorComponentCreator = (namespace: SocketIONa
 			const socket = activity.actor.socket;
 			switch( activity.action.type ) {
 			case 'connect':
-				socketSignaler( socketActionEmitter(socket, 'hello', dispatch, ( ... args ) => {
+				socketSignaler( socketActionEmitter(socket, 'hello', dispatch, () => {
 					return { actor: { id: 'lol' }, action: { type: 'hi' } };
 				} ) );
 				// an operator has connected, translate into operator action?
@@ -56,7 +56,7 @@ const createOperatorComponent: OperatorComponentCreator = (namespace: SocketIONa
 		return effect => {
 			// when an operator effect happens, we can not
 			if ( effect ) {
-				console.log( 'weird, there are no effects yet' );
+				throw new Error( 'unexpected effect' );
 			}
 		};
 	};

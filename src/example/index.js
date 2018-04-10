@@ -68,8 +68,11 @@ const appComponent: Component<App, Action, Effect> = combineComponents(
 		const operatorSignaler = operatorComponent( activity => {
 			console.log( 'operator wants to do something', activity, activity.actor );
 		} );
-		return signal => {
-			// do something to the operators	
+		return ( signal ) => {
+			// do something to the operators
+			if ( signal ) {
+				new Error( 'uhandled signal: ' );
+			}
 		};
 	}
 );
