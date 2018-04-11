@@ -1,58 +1,55 @@
 // @flow
 import type { Component, Dispatcher } from '../../fractal';
-export opaque type SocketIOSocket = any;
+export opaque type SocketIOSocket = SocketIOSocketInterface;
 export opaque type SocketIONamespace = any;
 export type SocketContext = { socket: SocketIOSocket, namespace: SocketIONamespace };
 
-type Signal<Action>
-	= SocketListener<Action>
-	| SocketEmit;
-
-type SocketEmit = {
-	type: 'socketEmit',
-	socket: SocketIOSocket,
-	eventName: string,
-	arguments: any[]
+interface SocketIOSocketInterface {
+	emit( eventName: string, ... eventArgs: mixed[] ): self;
+	removeListener( eventName: string, listener: Function ): self;
+	on( evenName: string, listener: Function ): self;
 }
+
+type SocketAction = { socket: SocketIOSocket };
+
+type Signal = void;
 
 export type SocketListener<Action> = {
 	type: 'socketListener',
 	socket: SocketIOSocket,
 	eventName: string,
 	dispatch: Dispatcher<Action>,
-	action: (... any[]) => Action
+	action: (... mixed[]) => Action
 };
 
-type SocketAction
-	= ConnectAction;
+export type SocketIOComponent = Component<SocketAction, Signal>;
 
-type ConnectAction = { context: SocketContext, type: 'connect' };
+export type SocketActionEmitterUnscriber = () => void;
 
-export type SocketIOComponent<Action> = Component<SocketAction, Signal<Action>>;
+export function createSocketActionListener<Action>( socket: SocketIOSocket, eventName: string, dispatch: Dispatcher<Action>, action: ( ... mixed[] ) => Action ): SocketActionEmitterUnscriber {
+	let listener = ( ... args: mixed[] ) => {
+		dispatch( action( ... args ) );
+	};
+	socket.on( eventName, listener );
 
-// question, how to set up listeners for specific events?
-// can we create a fully typed event action?
+	return () => socket.removeListener( eventName, listener );
+}
 
-function createSocketIOComponent<Action>( namespace: SocketIONamespace ): SocketIOComponent<Action> {
-	return ( dispatcher: Dispatcher<SocketAction> ) => {
+export function createSocketEmitter( socket: SocketIOSocket, eventName: string, ... emitArgs: mixed[] ) {
+	return () => {
+		socket.emit( eventName, ... emitArgs );
+	};
+}
+
+function createSocketIOComponent( namespace: SocketIONamespace ): SocketIOComponent {
+	return ( dispatch ) => {
 		namespace.on( 'connection', ( socket: SocketIOSocket ) => {
-			const context: SocketContext = {
-				namespace, socket
-			};
-			
-			dispatcher( { context, type: 'connect', action: { type: 'connect' } } );
+			dispatch( { socket } );
 		} );
-		return effect => {
+		return signal => {
 			// manipulates the namespace or socket
-			switch( effect.type ) {
-			case 'socketEmit':
-				effect.socket.emit( effect.eventName, ... effect.arguments );
-				break;
-			case 'socketListener':
-				effect.socket.on( effect.eventName, ( ... params ) => {
-					effect.dispatch( effect.action( ... params ) );
-				} );
-				break;
+			if ( signal ) {
+				throw new Error( 'there are no effects' );
 			}
 		};
 	};

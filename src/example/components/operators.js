@@ -1,7 +1,8 @@
 // @flow
-import type { Component, Dispatcher } from '../../fractal';
-import createSocketComponent from './socket-io';
-import type { SocketIOComponent, SocketIONamespace, SocketListener, SocketIOSocket } from './socket-io';
+import type { Component } from '../../fractal';
+import { createBufferedDispatcher } from '../../fractal';
+import createSocketComponent, { createSocketActionListener, createSocketEmitter } from './socket-io';
+import type { SocketIONamespace, SocketIOSocket } from './socket-io';
 
 type Operator = { id: string };
 export type OperatorAction
@@ -22,41 +23,43 @@ export type OperatorSignal = void;
 export type OperatorComponent = Component<OperatorAction, OperatorSignal>;
 type OperatorComponentCreator = (SocketIONamespace) => OperatorComponent;
 
-// type EmitListener<Actor, Action> = ( ... any[] ) => Activity<Actor, Action>;
+/**
+ * Pauses execution for the given number of milliseconds during a Promise chain.
+ */
+const waitFor = ( ms: number ) => new Promise( resolve => {
+	setTimeout( resolve, ms );
+} );
 
-const socketActionEmitter = <Action>( socket: SocketIOSocket, eventName: string, dispatch: Dispatcher<Action>, action: ( ... any[] ) => Action ): SocketListener<Action> => {
-	return {
-		type: 'socketListener',
-		socket,
-		eventName,
-		dispatch,
-		action
-	};
+const socketAuthenticator = ( socket: SocketIOSocket ): Promise<Operator> => {
+	return new Promise( resolve => {
+		const emitAuth = createSocketEmitter( socket, 'auth', async ( token: Operator ) => {
+			// try to authenticate the token
+			await waitFor( 2000 );
+			resolve( token );
+		} );
+		emitAuth();
+	} );
 };
 
 const createOperatorComponent: OperatorComponentCreator = (namespace: SocketIONamespace) => {
-	const component:SocketIOComponent<OperatorAction> = createSocketComponent( namespace );
+	const component = createSocketComponent( namespace );
 	// configure the component to subscribe to a socket and emit specific actions
 	return ( dispatch ) => {
-		// TODO: Map the dispatch from socket stuff to operator stuff
-		const socketSignaler = component( activity => {
-			const socket = activity.context.socket;
-			switch( activity.type ) {
-			case 'connect':
-				socketSignaler( socketActionEmitter(socket, 'hello', dispatch, () => {
-					return { operator: { id: 'fake' }, type: 'hi' };
-				} ) );
-				// an operator has connected, translate into operator action?
-				// set up some emit action dispatchers?
-				socketSignaler( { type: 'socketEmit', socket, eventName:'auth', arguments: [ ( token: Operator ) => {
-					// we can authenticate the operator here
-					dispatch( { operator: token, type: 'authenticated' } );
-				} ] } );
-				break;
-			}
+		component( activity => {
+			// set up some emit action dispatchers?
+			const authenticator = socketAuthenticator( activity.socket );
+			const bufferedDispatch = createBufferedDispatcher( authenticator, dispatch );
+
+			const listenFor = ( eventName: string, action: ( ... mixed[] ) => (Operator => OperatorAction) ) =>
+				createSocketActionListener( activity.socket, eventName, bufferedDispatch, action );
+
+			listenFor( 'hello', () => {
+				return operator => ( { operator, type: 'hi' } );
+			} );
 		} );
+
+		// currently we have no effects
 		return effect => {
-			// when an operator effect happens, we can not
 			if ( effect ) {
 				throw new Error( 'unexpected effect' );
 			}
