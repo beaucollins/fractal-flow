@@ -1,13 +1,17 @@
 // @flow
 import type { Component, Dispatcher } from 'fractal';
-export opaque type SocketIOSocket = SocketIOSocketInterface;
-export opaque type SocketIONamespace = any;
+export type SocketIOSocket = SocketIOSocketInterface;
+export type SocketIONamespace = SocketIONamespaceInterface;
 export type SocketContext = { socket: SocketIOSocket, namespace: SocketIONamespace };
 
 interface SocketIOSocketInterface {
 	emit( eventName: string, ... eventArgs: mixed[] ): self;
 	removeListener( eventName: string, listener: Function ): self;
 	on( evenName: string, listener: Function ): self;
+}
+
+interface SocketIONamespaceInterface {
+	on( eventName: string, Function ): self;
 }
 
 type SocketAction = { socket: SocketIOSocket };
