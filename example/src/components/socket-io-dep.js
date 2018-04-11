@@ -1,4 +1,6 @@
 // @flow
+import type { Component, Signaler } from 'fractal';
+
 type SocketIONamespace = any;
 type SocketIOSocket = any;
 type SocketAuthenticator = SocketIOSocket => Promise<void>;
@@ -7,8 +9,6 @@ type SocketIOConfig<Signal> = {
 	onConnection: SocketAuthenticator,
 	effectHandler: Signaler<Signal>
 }
-
-import type { Component, Signaler } from '../fractal';
 
 function socketIOComponent<Action, Signal>( config: SocketIOConfig<Signal> ): Component<Action, Signal> {
 	return dispatch => {

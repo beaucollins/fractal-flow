@@ -1,5 +1,5 @@
 // @flow
-import type { Component } from '../../fractal';
+import type { Component } from 'fractal';
 
 export type Signal = 'start' | 'stop';
 

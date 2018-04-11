@@ -1,6 +1,6 @@
 // @flow
-import type { Component } from '../../fractal';
-import socketIOComponent from '../../components/socket-io';
+import type { Component } from 'fractal';
+import socketIOComponent from './socket-io-dep';
 
 type UserID = string;
 export type User = { id: UserID };

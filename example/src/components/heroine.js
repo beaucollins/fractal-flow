@@ -1,0 +1,40 @@
+// @flow
+import { combineComponents } from 'fractal';
+import type { Component } from 'fractal';
+
+type Action
+	= { type: 'announce', name: string }
+	| { type: 'defend' }
+
+type Signal =  'danger' | 'calm';
+
+type HeroineComponent = Component<Action, Signal>;
+
+const heroineComponent: string => HeroineComponent = name => dispatch => {
+	dispatch( { type: 'announce', name } );
+	return ( signal ) => {
+		switch( signal ) {
+		case 'danger':
+			dispatch( { type: 'defend' } );
+			break;
+		case 'calm':
+			break;
+		}
+	};
+};
+
+let names = [
+	'Furiosa',
+	'Ripley',
+	'Captain Marvel',
+	'Scarlet Witch',
+	'Arwen'
+];
+
+const logAction = action => console.log( 'action >', action );
+
+console.log( 'assemble team:' );
+const team = combineComponents( ... names.map( heroineComponent ) )( logAction );
+
+console.log( 'signal danger:' );
+team( 'danger' );

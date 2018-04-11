@@ -1,6 +1,6 @@
 // @flow
-import type { Component } from '../../fractal';
-import { createBufferedDispatcher } from '../../fractal';
+import type { Component } from 'fractal';
+import { createBufferedDispatcher } from 'fractal';
 import createSocketComponent, { createSocketActionListener, createSocketEmitter } from './socket-io';
 import type { SocketIONamespace, SocketIOSocket } from './socket-io';
 

@@ -18,7 +18,7 @@ const runClient = ( userId ) => {
 
 	client.on( 'auth', callback => {
 		console.log( 'authing' );
-		callback( { id: program.user } );
+		callback( { id: userId } );
 	} );
 
 	setInterval( () => {

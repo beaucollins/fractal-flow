@@ -1,5 +1,5 @@
 // @flow
-import type { Component, Dispatcher } from '../../fractal';
+import type { Component, Dispatcher } from 'fractal';
 export opaque type SocketIOSocket = SocketIOSocketInterface;
 export opaque type SocketIONamespace = any;
 export type SocketContext = { socket: SocketIOSocket, namespace: SocketIONamespace };
