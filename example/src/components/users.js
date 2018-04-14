@@ -7,17 +7,17 @@ import createSocketComponent, { createSocketActionListener, joinSocketToRoom } f
 type UserID = string;
 export type User = { id: UserID };
 
-export type Action
+export type UserAction
  = { user: User, action: 'grow' }
  | { user: User, action: 'shrink' }
  | { user: User, action: 'dispatch', userAction: mixed };
 
-export type Signal
+export type UserSignal
 	= { type: 'timer', time: number }
 	| { type: 'broadcast', message: string }
 	| { type: 'sync', userID: UserID };
 
-export type UserComponent = Component<Action, Signal>;
+export type UserComponent = Component<UserAction, UserSignal>;
 
 type Authenticator = (SocketIOSocket) => Promise<User>;
 
@@ -34,7 +34,7 @@ export default function(namespace: SocketIONamespace, authenticator: Authenticat
 			};
 			const bufferedDispatch = createBufferedDispatcher( auth(), dispatch );
 
-			const listenFor = ( eventName: string, action: ( ... mixed[] ) => (User => Action) ) =>
+			const listenFor = ( eventName: string, action: ( ... mixed[] ) => (User => UserAction) ) =>
 				createSocketActionListener( activity.socket, eventName, bufferedDispatch, action );
 
 			listenFor( 'grow', () => {

@@ -1,9 +1,7 @@
 // @flow
 import type { Component } from 'fractal';
 
-export type Signal = 'start' | 'stop';
-
-const component: (number) => Component<number, Signal> = ( interval = 1000 ) => ( dispatcher ) => {
+const component: (number) => Component<number, 'start' | 'stop'> = ( interval = 1000 ) => ( dispatcher ) => {
 	let timer = null;
 	const start = () => {
 		if ( timer ) {

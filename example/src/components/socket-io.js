@@ -17,9 +17,9 @@ interface SocketIONamespaceInterface {
 	emit( eventName: string, ... eventArgs: mixed[] ): self;
 }
 
-type SocketAction = { socket: SocketIOSocket };
+type SocketIOAction = { socket: SocketIOSocket };
 
-type Signal
+type SocketIOSignal
 	= EmitSignal;
 
 type EmitSignal = {
@@ -37,7 +37,7 @@ export type SocketListener<Action> = {
 	action: (... mixed[]) => Action
 };
 
-export type SocketIOComponent = Component<SocketAction, Signal>;
+export type SocketIOComponent = Component<SocketIOAction, SocketIOSignal>;
 
 export type SocketActionEmitterUnscriber = () => void;
 
