@@ -1,19 +1,19 @@
 {
   "name": "fractal",
   "version": "1.0.0",
-  "description": "",
+  "description": "A realtime bi-directional application flow control pattern",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "flow": "flow",
-    "build:src": "babel -o ./index.js src/fractal.jsn",
+    "build:src": "babel -o ./index.js src/fractal.js",
     "prepare": "npm run -s build:src"
   },
   "files": [
     "index.js"
   ],
-  "author": "",
-  "license": "ISC",
+  "author": "Robert Collins <beau@collins.pub>",
+  "license": "GPL-3.0",
   "devDependencies": {
     "@babel/cli": "^7.0.0-beta.44",
     "@babel/core": "^7.0.0-beta.44",
@@ -31,5 +31,9 @@
     "flow-bin": "^0.69.0",
     "flow-typed": "^2.4.0"
   },
-  "dependencies": {}
+  "dependencies": {},
+  "repository": {
+    "type": "git",
+    "url": "https://gitub.com/beaucollins/fractal.git"
+  }
 }
