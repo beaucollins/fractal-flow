@@ -27,8 +27,7 @@
     "eslint": "^4.19.1",
     "eslint-plugin-flowtype": "^2.46.1",
     "flow": "^0.2.3",
-    "flow-bin": "^0.69.0",
-    "flow-typed": "^2.4.0"
+    "flow-bin": "^0.69.0"
   },
   "dependencies": {},
   "repository": {
