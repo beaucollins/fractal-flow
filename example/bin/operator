@@ -22,7 +22,7 @@ const runClient = ( userId ) => {
 	} );
 
 	setInterval( () => {
-		client.emit( 'hello', { type: 'INCREMENT', amount: 5 } );
+		client.emit( 'broadcast', 'hello' );
 	}, 1000 );
 
 	client.on( 'api.state', ( state ) => {

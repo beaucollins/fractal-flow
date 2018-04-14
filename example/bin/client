@@ -1,6 +1,5 @@
 #!/usr/bin/env babel-node
 /* eslint-disable no-console */
-// @flow
 const createIOClient = require( 'socket.io-client' );
 const program = require( 'commander' );
 
@@ -24,14 +23,18 @@ const runClient = ( userId ) => {
 
 	setInterval( () => {
 		client.emit( 'dispatch', { type: 'INCREMENT', amount: 5 } );
-	}, 1000 );
+	}, 10000 );
 
 	client.on( 'api.state', ( state ) => {
 		console.log( 'received state', state );
 	} );
 
-	client.on( 'effect', ( ts ) => {
-		console.log( 'got an effect', ts );
+	client.on( 'broadcast', ( message ) => {
+		console.log( 'received broadcast', message );
+	} );
+
+	client.on( 'time', ( ts ) => {
+		console.log( 'got time', ts );
 	} );
 
 	client.on( 'connect', () => {

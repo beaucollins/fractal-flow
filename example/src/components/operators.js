@@ -7,6 +7,7 @@ import type { SocketIONamespace, SocketIOSocket } from './socket-io';
 type Operator = { id: string };
 export type OperatorAction
 	= AuthenticatedAction
+	| { type: 'broadcast', message: string, operator: Operator }
 	| MockAction;
 
 
@@ -50,11 +51,18 @@ const createOperatorComponent: OperatorComponentCreator = (namespace: SocketIONa
 			const authenticator = socketAuthenticator( activity.socket );
 			const bufferedDispatch = createBufferedDispatcher( authenticator, dispatch );
 
-			const listenFor = ( eventName: string, action: ( ... mixed[] ) => (Operator => OperatorAction) ) =>
+			const listenFor = ( eventName: string, action: ( ... mixed[] ) => (Operator => ?OperatorAction) ) =>
 				createSocketActionListener( activity.socket, eventName, bufferedDispatch, action );
 
 			listenFor( 'hello', () => {
 				return operator => ( { operator, type: 'hi' } );
+			} );
+			listenFor( 'broadcast', ( message: mixed ) => {
+				return operator =>  {
+					if ( typeof message === 'string' ) {
+						return { operator, message, type: 'broadcast' };	
+					}
+				};
 			} );
 		} );
 

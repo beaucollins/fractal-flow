@@ -2,24 +2,20 @@
 import type { Component } from 'fractal';
 import { createBufferedDispatcher } from 'fractal';
 import type { SocketIOSocket, SocketIONamespace } from './socket-io';
-import createSocketComponent, { createSocketActionListener } from './socket-io';
+import createSocketComponent, { createSocketActionListener, joinSocketToRoom } from './socket-io';
 
 type UserID = string;
 export type User = { id: UserID };
+
 export type Action
  = { user: User, action: 'grow' }
- | { user: User, action: 'sink' };
+ | { user: User, action: 'shrink' }
+ | { user: User, action: 'dispatch', userAction: mixed };
 
 export type Signal
-	= { type: 'socket', socket: SocketIOSocket, action: SocketActionType  }
-	| { type: 'emit', name: string, to?: string | string[], args: mixed[] }
+	= { type: 'timer', time: number }
+	| { type: 'broadcast', message: string }
 	| { type: 'sync', userID: UserID };
-
-type SocketActionType
-	= { type: 'leave', room: string }
-	| { type: 'join', room: string }
-	| { type: 'emit', name: string, args: mixed[] }
-	| { type: 'disconnect' }
 
 export type UserComponent = Component<Action, Signal>;
 
@@ -29,10 +25,14 @@ export default function(namespace: SocketIONamespace, authenticator: Authenticat
 	const component = createSocketComponent( namespace );
 	// configure the component to subscribe to a socket and emit specific actions
 	return ( dispatch ) => {
-		component( activity => {
+		const signaler = component( activity => {
 			// set up some emit action dispatchers?
-			const auth = authenticator( activity.socket );
-			const bufferedDispatch = createBufferedDispatcher( auth, dispatch );
+			const auth = async () => {
+				const user = await authenticator( activity.socket );
+				await joinSocketToRoom( activity.socket, user.id );
+				return user;
+			};
+			const bufferedDispatch = createBufferedDispatcher( auth(), dispatch );
 
 			const listenFor = ( eventName: string, action: ( ... mixed[] ) => (User => Action) ) =>
 				createSocketActionListener( activity.socket, eventName, bufferedDispatch, action );
@@ -40,35 +40,26 @@ export default function(namespace: SocketIONamespace, authenticator: Authenticat
 			listenFor( 'grow', () => {
 				return user => ( { user, action: 'grow' } );
 			} );
+			listenFor( 'shrink', () => {
+				return user => ( { user, action: 'shrink' } );
+			} );
+			listenFor( 'dispatch', ( userAction ) => {
+				return user => ( { user, action: 'dispatch', userAction } );
+			} );
 		} );
 
-		// currently we don't know what to do with ourselves
-		return effect => {
-			if ( effect.type ) {
-				switch( effect.type ) {
+		return signal => {
+			if ( signal.type ) {
+				switch( signal.type ) {
 				case 'sync':
+					signaler( { type: 'emit', eventName: 'api.state', to: signal.userID, emitArgs: [ { hello: 'world' } ] } );
 					break;
-				case 'emit':
-					( effect.to
-						? namespace.to( effect.to )
-						: namespace )
-						.emit( effect.name, ... effect.args );
+				case 'timer':
+					signaler( { type: 'emit', eventName: 'time', emitArgs: [ signal.time ] } );
 					break;
-				case 'socket':
-					switch ( effect.action.type ) {
-					case 'emit':
-						effect.socket.emit( effect.action.name, ... effect.action.args );
-						break;
-					case 'leave':
-						effect.socket.leave( effect.action.room );
-						break;
-					case 'join':
-						effect.socket.join( effect.action.room );
-						break;
-					case 'disconnect':
-						effect.socket.disconnect();
-						break;
-					}
+				case 'broadcast':
+					signaler( { type: 'emit', eventName: 'broadcast', emitArgs: [ signal.message ] } );
+					break;
 				}
 			}
 		};
