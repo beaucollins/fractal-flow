@@ -1,5 +1,5 @@
 // @flow
-import type { Component, CombinedDispatch } from 'fractal';
+import type { Component } from 'fractal';
 import { createApp } from 'fractal';
 
 const hello: Component<string, string> = dispatcher => {

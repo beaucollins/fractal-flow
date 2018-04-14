@@ -1,7 +1,6 @@
 // @flow
-export type Dispatcher<Action> = (Action) => void | Promise<void>;
-export type Signaler<Signal> = (Signal) => void | Promise<void>;
-export type Component<Action, Signal> = (Dispatcher<Action>) => Signaler<Signal>;
+export type Dispatcher<T> = (T) => void | Promise<void>;
+export type Component<Action, Signal> = (Dispatcher<Action>) => Dispatcher<Signal>;
 
 export function mapComponent<A1, S1, A2, S2>( mapActivity: (A1) => ?A2, mapSignal: S2 => ?S1, component: Component<A1, S1> ): Component<A2, S2> {
 	return ( dispatcher: Dispatcher<A2> ) => {
@@ -119,7 +118,7 @@ export function createBufferedDispatcher<T, Action>( resolver: Promise<T>, dispa
 }
 
 
-type ExtractSignalType = <A, S>(Component<A, S>) => Signaler<S>;
+type ExtractSignalType = <A, S>(Component<A, S>) => Dispatcher<S>;
 type ExtractAppDispatcher<T> = <A, S>(Component<A, S>) => (A, T) => void | Promise<void>;
 
 type CombinedDispatch<O: Object, T> = $ObjMap<O, ExtractAppDispatcher<T>>;
