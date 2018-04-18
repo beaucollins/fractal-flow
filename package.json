@@ -1,6 +1,6 @@
 {
   "name": "fractal",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "A realtime bi-directional application flow control pattern",
   "main": "index.js",
   "scripts": {
