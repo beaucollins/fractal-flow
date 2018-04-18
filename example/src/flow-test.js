@@ -1,29 +1,30 @@
 // @flow
-import type { Component } from 'fractal';
+/* eslint-disable no-console */
+import type { Component, Dispatcher } from 'fractal';
 import { createApp } from 'fractal';
 
-const hello: Component<string, string> = dispatcher => {
+const hello: Component<string, *> = dispatcher => {
 	// dispatcher( 'hello' );
-	return signal => {
+	return ( signal: string ) => {
 		console.log( 'hello signal', signal );
 		dispatcher( signal.toUpperCase() );
 	};
 };
 
-const goodbye: Component<number, number> = dispatcher => {
+const goodbye: Component<number, *> = dispatcher => {
 	// dispatcher( 6 );
-	return signal => {
+	return ( signal: number ) => {
 		console.log( 'goodbye', signal );
 		dispatcher( signal + 1 );
 	};
 };
 
-const funny: Component<boolean, Object> = () => () => {};
+const funny: Component<boolean, Dispatcher<Object>> = () => () => {};
 
 type CustomAction = { type: 'custom', value: string };
 type CustomSignal = { type: 'custom', signalValue: string };
 
-const custom: Component<CustomAction, CustomSignal> = () => () => {};
+const custom: Component<CustomAction, Dispatcher<CustomSignal>> = () => () => {};
 
 const components = { hello, goodbye, funny, custom };
 

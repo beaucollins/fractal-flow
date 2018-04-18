@@ -1,21 +1,16 @@
 // @flow
 export type Dispatcher<T> = (T) => void | Promise<void>;
-export type Component<Action, Signal> = (Dispatcher<Action>) => Dispatcher<Signal>;
+export type Component<Action, Signaler> = (Dispatcher<Action>) => Signaler;
 
-export function mapComponent<A1, S1, A2, S2>( mapActivity: (A1) => ?A2, mapSignal: S2 => ?S1, component: Component<A1, S1> ): Component<A2, S2> {
+export function mapComponent<A1, S1, A2, S2>( mapActivity: (A1) => ?A2, mapSignal: S1 => S2, component: Component<A1, S1> ): Component<A2, S2> {
 	return ( dispatcher: Dispatcher<A2> ) => {
-		const handler = component( ( activity ) => {
+		const signal = component( ( activity ) => {
 			const mappedActivity = mapActivity( activity );
 			if ( mappedActivity ) {
 				dispatcher( mappedActivity );
 			}
 		} );
-		return signal => {
-			const mappedSignal = mapSignal( signal );
-			if ( mappedSignal ) {
-				handler( mappedSignal );
-			}
-		};
+		return mapSignal( signal );
 	};
 } 
 
@@ -54,12 +49,9 @@ export function mapComponent<A1, S1, A2, S2>( mapActivity: (A1) => ?A2, mapSigna
  * 	 )
  * );
  */
-export function combineComponents<Action, Signal>( ... components: Component<Action, Signal>[] ): Component<Action, Signal> {
-	return ( dispatch: Dispatcher<Action> ) => {
-		const all = components.map( component => component( dispatch ) );
-		return effect => {
-			all.map( handler => handler( effect ) );
-		};
+export function combineComponents<Action, Signal>( ... components: Component<Action, Signal>[] ): Component<Action, Signal[]> {
+	return ( dispatch ) => {
+		return components.map( component => component( dispatch ) );
 	};
 }
 
@@ -118,17 +110,22 @@ export function createBufferedDispatcher<T, Action>( resolver: Promise<T>, dispa
 }
 
 
-type ExtractSignalType = <A, S>(Component<A, S>) => Dispatcher<S>;
+type ExtractSignalType = <A, S>(Component<A, S>) => S;
 type ExtractAppDispatcher<T> = <A, S>(Component<A, S>) => (A, T) => void | Promise<void>;
+type ExtractActionType = <A, S>(Component<A, S>) => A;
 
 type CombinedDispatch<O: Object, T> = $ObjMap<O, ExtractAppDispatcher<T>>;
 type CombinedSignals<O: Object> = $ObjMap<O, ExtractSignalType>;
+type CombinedActions<O: Object> = $ObjMap<O, ExtractActionType>;
 
-export function createApp<O: Object>(components: O): (CombinedDispatch<O, CombinedSignals<O>>) => CombinedSignals<O>  {
+const run = ( key, action, exec ) => { exec(); };
+
+export function createApp<O: Object>(components: O, middleware?: ( $Keys<O>, $Values<CombinedActions<O>>, () => Promise<void>, CombinedSignals<O> ) => any = run ): (CombinedDispatch<O, CombinedSignals<O>> ) => CombinedSignals<O>  {
 	return ( dispatcher ) => {
 		const signals: CombinedSignals<O> = Object.keys( components ).reduce( ( acc, key ) => {
 			return Object.assign( acc, { [ key ]: components[key]( action => {
-				dispatcher[ key ]( action, signals );
+				const exec = async () => await dispatcher[ key ]( action, signals );
+				middleware( key, action, exec, signals );
 			} ) } );
 		}, {} );
 		return signals;

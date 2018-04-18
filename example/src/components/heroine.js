@@ -1,6 +1,7 @@
 // @flow
+/* eslint-disable no-console */
 import { combineComponents } from 'fractal';
-import type { Component } from 'fractal';
+import type { Component, Dispatcher } from 'fractal';
 
 type Action
 	= { type: 'announce', name: string }
@@ -8,9 +9,9 @@ type Action
 
 type Signal =  'danger' | 'calm';
 
-type HeroineComponent = Component<Action, Signal>;
+type HeroineComponent = Component<Action, Dispatcher<Signal>>;
 
-const heroineComponent: string => HeroineComponent = name => dispatch => {
+const createHeroineComponent: string => HeroineComponent = name => dispatch => {
 	dispatch( { type: 'announce', name } );
 	return ( signal ) => {
 		switch( signal ) {
@@ -34,7 +35,15 @@ let names = [
 const logAction = action => console.log( 'action >', action );
 
 console.log( 'assemble team:' );
-const team = combineComponents( ... names.map( heroineComponent ) )( logAction );
+const teamComponent: HeroineComponent = ( dispatcher ) => {
+	const components = combineComponents( ... names.map( createHeroineComponent ) );
+	const all = components( dispatcher );
+	return ( signal ) => {
+		all.forEach( member => member( signal ) );
+	};
+};
+
+const team = teamComponent( logAction );
 
 console.log( 'signal danger:' );
 team( 'danger' );

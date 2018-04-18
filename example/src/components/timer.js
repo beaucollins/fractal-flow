@@ -1,7 +1,7 @@
 // @flow
 import type { Component } from 'fractal';
 
-const component: (number) => Component<number, 'start' | 'stop'> = ( interval = 1000 ) => ( dispatcher ) => {
+const component: (number) => Component<number, *> = ( interval = 1000 ) => ( dispatcher ) => {
 	let timer = null;
 	const start = () => {
 		if ( timer ) {
@@ -14,15 +14,9 @@ const component: (number) => Component<number, 'start' | 'stop'> = ( interval = 
 	const stop = () => {
 		if ( timer ) clearInterval( timer );
 	};
-	return ( effect ) => {
-		switch( effect ) {
-		case 'start':
-			start();
-			break;
-		case 'stop':
-			stop();
-			break;
-		}
+	return {
+		start,
+		stop
 	};
 };
 

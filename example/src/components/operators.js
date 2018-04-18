@@ -1,5 +1,5 @@
 // @flow
-import type { Component } from 'fractal';
+import type { Component, Dispatcher } from 'fractal';
 import { createBufferedDispatcher } from 'fractal';
 import createSocketComponent, { createSocketActionListener, createSocketEmitter } from './socket-io';
 import type { SocketIONamespace, SocketIOSocket } from './socket-io';
@@ -21,7 +21,7 @@ type AuthenticatedAction = {
 }
 
 export type OperatorSignal = void;
-export type OperatorComponent = Component<OperatorAction, OperatorSignal>;
+export type OperatorComponent = Component<OperatorAction, Dispatcher<OperatorSignal>>;
 type OperatorComponentCreator = (SocketIONamespace) => OperatorComponent;
 
 /**

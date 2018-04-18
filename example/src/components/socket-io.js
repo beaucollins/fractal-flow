@@ -37,7 +37,7 @@ export type SocketListener<Action> = {
 	action: (... mixed[]) => Action
 };
 
-export type SocketIOComponent = Component<SocketIOAction, SocketIOSignal>;
+export type SocketIOComponent = Component<SocketIOAction, Dispatcher<SocketIOSignal>>;
 
 export type SocketActionEmitterUnscriber = () => void;
 

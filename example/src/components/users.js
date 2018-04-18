@@ -1,5 +1,5 @@
 // @flow
-import type { Component } from 'fractal';
+import type { Component, Dispatcher } from 'fractal';
 import { createBufferedDispatcher } from 'fractal';
 import type { SocketIOSocket, SocketIONamespace } from './socket-io';
 import createSocketComponent, { createSocketActionListener, joinSocketToRoom } from './socket-io';
@@ -17,7 +17,7 @@ export type UserSignal
 	| { type: 'broadcast', message: string }
 	| { type: 'sync', userID: UserID };
 
-export type UserComponent = Component<UserAction, UserSignal>;
+export type UserComponent = Component<UserAction, Dispatcher<UserSignal>>;
 
 type Authenticator = (SocketIOSocket) => Promise<User>;
 

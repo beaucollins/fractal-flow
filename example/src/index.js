@@ -1,5 +1,5 @@
 // @flow
-import type { Component } from 'fractal';
+import type { Component, Dispatcher } from 'fractal';
 import { createApp } from 'fractal';
 import createIOServer from 'socket.io';
 import type { SocketIOSocket } from './components/socket-io';
@@ -17,11 +17,11 @@ const userAuthenticator = ( socket: SocketIOSocket ) => new Promise( resolve => 
 const io = createIOServer();
 
 const users = createUserComponent(io.of('/users'), userAuthenticator);
-const echo: Component<mixed, mixed> = dispatch => dispatch;
+const echo: Component<mixed, *> = dispatch => dispatch;
 const timer = timerComponent( 1000 );
 const operators = createOperatorComponent(io.of('/operators'));
 
-const accumulator: Component<number, number | 'reset'> = dispatch => {
+const accumulator: Component<number, Dispatcher<number | 'reset'>> = dispatch => {
 	let current = 0;
 	return signal => {
 		if ( signal === 'reset' ) {
@@ -33,7 +33,7 @@ const accumulator: Component<number, number | 'reset'> = dispatch => {
 	};
 };
 
-const interval: Component<void, void> = dispatch => {
+const interval: Component<void, () => void> = dispatch => {
 	let id = setInterval( dispatch, 100 );
 	return () => {
 		clearInterval( id );
@@ -77,7 +77,7 @@ const appSignals = app( {
 	}
 } );
 
-appSignals.timer( 'start' );
+appSignals.timer.start();
 appSignals.echo( 'hi' );
 
 io.listen( 3003 );
